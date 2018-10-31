@@ -8,6 +8,13 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.stepfunctions.AWSStepFunctions;
 import com.amazonaws.services.stepfunctions.AWSStepFunctionsClientBuilder;
 import com.amazonaws.services.stepfunctions.model.StartExecutionRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 public class PurchaseProcessLambda implements RequestHandler<PurchaseInput, PurchaseOutput> {
     private static final String PURCHASE_STEP_FUNCTION_ARN_ENV = "PURCHASE_STEP_FUNCTION_ARN_ENV";
@@ -18,8 +25,9 @@ public class PurchaseProcessLambda implements RequestHandler<PurchaseInput, Purc
         StartExecutionRequest executionRequest = (new StartExecutionRequest())
                 .withStateMachineArn(purchaseStepFunctionARN)
                 .withInput("{\"cartId\":\"" + request.getCartId() + "\"}");
-        getStepFunctions().startExecution(executionRequest);
-        return new PurchaseOutput("after step function called");
+        //getStepFunctions().startExecution(executionRequest);
+        String call = call();
+        return new PurchaseOutput(call);
     }
 
     private static AWSStepFunctions getStepFunctions() {
@@ -29,5 +37,33 @@ public class PurchaseProcessLambda implements RequestHandler<PurchaseInput, Purc
                 .standard()
                 .withEndpointConfiguration(endpointConfiguration)
                 .build();
+    }
+
+    public static String call() {
+        try {
+            String url = "http://wiremock:8080/get/this";
+
+            HttpClient client = HttpClientBuilder.create().build();
+            HttpGet request = new HttpGet(url);
+
+            HttpResponse response = client.execute(request);
+
+            System.out.println("Response Code : "
+                    + response.getStatusLine().getStatusCode());
+
+            BufferedReader rd = new BufferedReader(
+                    new InputStreamReader(response.getEntity().getContent()));
+
+            StringBuffer result = new StringBuffer();
+            String line = "";
+            while ((line = rd.readLine()) != null) {
+                result.append(line);
+            }
+            return result.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+
+        }
+
     }
 }

@@ -51,18 +51,18 @@ public class Steps {
     public void createLambda() throws Exception {
         System.out.println("start create and call lambda");
 
-        String existingStateMachineArn = StepFunctionUtils.getStateMachineArnByName(STEP_FUNCTION);
-        List<ExecutionListItem> existingExecutions = StepFunctionUtils.getExecutionsByStateMachineArn(existingStateMachineArn);
-        System.out.println(">>>> size before" + existingExecutions.size());
-
-        StepFunctionUtils.deleteStateMachine(STEP_FUNCTION);
-
-        CreateStateMachineResult stateMachine = StepFunctionUtils.createStateMachine(STEP_FUNCTION, ROLE);
-        String stateMachineArn = stateMachine.getStateMachineArn();
+//        String existingStateMachineArn = StepFunctionUtils.getStateMachineArnByName(STEP_FUNCTION);
+//        List<ExecutionListItem> existingExecutions = StepFunctionUtils.getExecutionsByStateMachineArn(existingStateMachineArn);
+//        System.out.println(">>>> size before" + existingExecutions.size());
+//
+//        StepFunctionUtils.deleteStateMachine(STEP_FUNCTION);
+//
+//        CreateStateMachineResult stateMachine = StepFunctionUtils.createStateMachine(STEP_FUNCTION, ROLE);
+//        String stateMachineArn = stateMachine.getStateMachineArn();
 
         final File purchaseCode = FileUtils.find(PURCHASE_FILE_NAME);
         final HashMap<String, String> vars = new HashMap<>();
-        vars.putIfAbsent(PURCHASE_STEP_FUNCTION_ARN_ENV, stateMachineArn);
+        //vars.putIfAbsent(PURCHASE_STEP_FUNCTION_ARN_ENV, stateMachineArn);
         final String purchaseFunctionArn = LambdaUtils.createFunction(PURCHASE_FUNCTION, PURCHASE_LAMBDA_HANDLER, purchaseCode, vars);
 
         final PurchaseInput request = new PurchaseInput(CART_ID);
@@ -70,19 +70,19 @@ public class Steps {
 
         final String payload = new String(response.getPayload().array(), StandardCharsets.UTF_8.name());
         Assert.assertEquals(HttpStatus.SC_OK, response.getSdkHttpMetadata().getHttpStatusCode());
-        Assert.assertTrue(payload.contains("after step function called"));
+        Assert.assertTrue(payload.contains("Here it is!"));
 
-        List<ExecutionListItem> executions = StepFunctionUtils.getExecutionsByStateMachineArn(stateMachineArn);
-        System.out.println(">>>> size after" + executions.size());
-        Collections.sort(executions, Comparator.comparing(ExecutionListItem::getStartDate).reversed());
-
-        List<ExecutionListItem> delta = executions.stream().filter(execution -> !existingExecutions.contains(execution)).collect(Collectors.toList());
-        System.out.println("delta.size: " + delta.size());
-        if (delta.size() == 1) {
-            ExecutionListItem executionListItem = delta.get(0);
-            System.out.println("status: " + executionListItem.getStatus());
-            System.out.println("start date: " + executionListItem.getStartDate());
-        }
+//        List<ExecutionListItem> executions = StepFunctionUtils.getExecutionsByStateMachineArn(stateMachineArn);
+//        System.out.println(">>>> size after" + executions.size());
+//        Collections.sort(executions, Comparator.comparing(ExecutionListItem::getStartDate).reversed());
+//
+//        List<ExecutionListItem> delta = executions.stream().filter(execution -> !existingExecutions.contains(execution)).collect(Collectors.toList());
+//        System.out.println("delta.size: " + delta.size());
+//        if (delta.size() == 1) {
+//            ExecutionListItem executionListItem = delta.get(0);
+//            System.out.println("status: " + executionListItem.getStatus());
+//            System.out.println("start date: " + executionListItem.getStartDate());
+//        }
 
     }
 }
