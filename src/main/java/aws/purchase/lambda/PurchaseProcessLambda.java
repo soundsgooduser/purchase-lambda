@@ -24,7 +24,7 @@ public class PurchaseProcessLambda implements RequestHandler<PurchaseInput, Purc
 
     private static AWSStepFunctions getStepFunctions() {
         AwsClientBuilder.EndpointConfiguration endpointConfiguration
-                = new AwsClientBuilder.EndpointConfiguration("http://localhost:4584", "us-east-1");
+                = new AwsClientBuilder.EndpointConfiguration("http://host.docker.internal:4584", "us-east-1");
         return AWSStepFunctionsClientBuilder
                 .standard()
                 .withEndpointConfiguration(endpointConfiguration)
